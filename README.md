@@ -23,7 +23,7 @@ Tack `--verbose` onto the end to get some live debug output as it goes.
 
 Use `--model-id jbochi/madlad400-3b-mt` if you're impatient and want a smaller model.
 
-On an Intel i7-12700KF, 7b-mt-bt runs at around 1 token/s, 3b-mt runs at around 2.8 token/s.
+On an Intel i7-12700KF, 7b-mt-bt runs at around 2.5 token/s, 3b-mt runs at around 5 token/s.
 
 Example input JSON file:
 ```json
