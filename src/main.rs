@@ -224,6 +224,7 @@ fn translate(args: Args, builder: &T5ModelBuilder, model: &mut T5ForConditionalG
     let mut actual_tokens = language_token.clone();
     actual_tokens.extend(tokens);
 
+    model.clear_kv_cache();
     let input_token_ids = Tensor::new(&actual_tokens[..], &builder.device)?.unsqueeze(0)?;
     let mut output_token_ids = [builder.config.decoder_start_token_id.unwrap_or(builder.config.pad_token_id) as u32].to_vec();
     
@@ -233,7 +234,6 @@ fn translate(args: Args, builder: &T5ModelBuilder, model: &mut T5ForConditionalG
     verbose(&args, "mcmonkey's Translate-Tool will now translate...");
     let start = std::time::Instant::now();
     let mut final_result_str: String = "".to_owned();
-    model.clear_kv_cache();
     for index in 0.. {
         if output_token_ids.len() > 512 {
             break;
