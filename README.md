@@ -28,7 +28,8 @@ Use `--model-id jbochi/madlad400-3b-mt` if you're impatient and want a smaller m
 Speed comparison:
 | CPU | 7B-MT-BT | 3B-MT |
 | --- | -------- | ----- |
-| i7-12700KF | 2.5 tok/s | 5 tok/s |
+| Intel i7-12700KF (12 p-core) | 2.5 tok/s | 5 tok/s |
+| AMD Ryzen 5 3600 (6 core) | 1.5 tok/s | 3.6 tok/s |
 
 #### Example input JSON file:
 ```json
