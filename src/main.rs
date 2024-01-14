@@ -158,7 +158,8 @@ fn sane_split(prompt: &str, split: &str, min: usize, max: usize) -> Vec<String> 
     result
 }
 
-fn translate(args: Args, builder: &T5ModelBuilder, model: &mut T5ForConditionalGeneration, tokenizer: &TokenizerImpl<ModelWrapper, NormalizerWrapper, PreTokenizerWrapper, PostProcessorWrapper, DecoderWrapper>, logits_processor: &mut LogitsProcessor, prompt: &str, language_token: &Vec<u32>) -> Result<(String, usize)> {
+fn translate(args: Args, builder: &T5ModelBuilder, model: &mut T5ForConditionalGeneration, tokenizer: &TokenizerImpl<ModelWrapper, NormalizerWrapper, PreTokenizerWrapper, PostProcessorWrapper, DecoderWrapper>, logits_processor: &mut LogitsProcessor, in_prompt: &str, language_token: &Vec<u32>) -> Result<(String, usize)> {
+    let prompt = in_prompt.trim();
     verbose(&args, format!("mcmonkey's Translate-Tool received input '{}', tokenizing...", prompt).as_str());
     let tokens = tokenizer.encode(prompt, true).map_err(E::msg)?.get_ids().to_vec();
 
@@ -178,39 +179,39 @@ fn translate(args: Args, builder: &T5ModelBuilder, model: &mut T5ForConditionalG
         Ok((result_str, total_len))
     };
     // Tries newlines, then sentence boundaries, then word boundaries, then gives up and uses raw token chunking.
-    if tokens.len() > 120 {
-        let chunks = sane_split(prompt, "\n", 20, 110);
+    if tokens.len() > 100 {
+        let chunks = sane_split(prompt, "\n", 20, 80);
         if chunks.len() > 1 {
             verbose(&args, format!("Prompt length is {}, splitting to {} chunks based on new line", tokens.len(), chunks.len()).as_str());
             return subtranslate_chunk(chunks, "\n");
         }
     }
-    if tokens.len() > 120 {
-        let chunks = sane_split(prompt, ". ", 20, 110);
+    if tokens.len() > 100 {
+        let chunks = sane_split(prompt, ". ", 20, 80);
         if chunks.len() > 1 {
             verbose(&args, format!("Prompt length is {}, splitting to {} chunks based on sentence boundaries", tokens.len(), chunks.len()).as_str());
             return subtranslate_chunk(chunks, ". ");
         }
     }
-    if tokens.len() > 120 {
-        let chunks = sane_split(prompt, ",", 40, 110);
+    if tokens.len() > 100 {
+        let chunks = sane_split(prompt, ",", 30, 80);
         if chunks.len() > 1 {
             verbose(&args, format!("Prompt length is {}, splitting to {} chunks based on commas", tokens.len(), chunks.len()).as_str());
             return subtranslate_chunk(chunks, ",");
         }
     }
-    if tokens.len() > 120 {
-        let chunks = sane_split(prompt, " ", 40, 110);
+    if tokens.len() > 100 {
+        let chunks = sane_split(prompt, " ", 30, 80);
         if chunks.len() > 1 {
             verbose(&args, format!("Prompt length is {}, splitting to {} chunks based on spaces", tokens.len(), chunks.len()).as_str());
             return subtranslate_chunk(chunks, " ");
         }
     }
-    if tokens.len() > 120 {
+    if tokens.len() > 100 {
         let mut result = "".to_owned();
         let mut total_len: usize = 0;
         verbose(&args, format!("Prompt length is {}, splitting to chunks around raw token split 100 (THIS IS BAD, WILL MISTRANSLATE NEAR BOUNDARY)", tokens.len()).as_str());
-        for chunk in tokens.chunks(100) {
+        for chunk in tokens.chunks(80) {
             let chunk = chunk.to_vec();
             let prompt = tokenizer.decode(chunk.as_slice(), false).map_err(E::msg)?;
             let (chunk_result, chunk_len) = translate(args.clone(), builder, model, tokenizer, logits_processor, &prompt, language_token)?;
@@ -272,6 +273,9 @@ fn translate(args: Args, builder: &T5ModelBuilder, model: &mut T5ForConditionalG
     final_result_str = final_result_str.trim().to_owned();
     let dt = start.elapsed();
     verbose(&args, &format!("\n{} tokens generated ({:.2} token/s)\n", output_token_ids.len(), output_token_ids.len() as f64 / dt.as_secs_f64()));
+    if final_result_str.len() > prompt.len() * 10 {
+        println!("WARNING: Result is {} chars long, but input was {} chars long - probably translation failure -- {prompt}, {final_result_str}", final_result_str.len(), prompt.len());
+    }
     Ok((final_result_str, output_token_ids.len()))
 }
 
