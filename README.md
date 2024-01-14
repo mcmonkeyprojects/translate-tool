@@ -6,7 +6,8 @@ Built using https://github.com/huggingface/candle and by default uses this model
 
 ## Usage
 
-Install rust: https://www.rust-lang.org/tools/install
+- Install rust: https://www.rust-lang.org/tools/install
+    - Expect silly rust errors that you have to google (eg requiring Visual Studio on Windows for some reason)
 
 Compile:
 ```sh
