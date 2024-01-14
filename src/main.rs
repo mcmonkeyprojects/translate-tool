@@ -316,6 +316,13 @@ fn main() -> Result<()> {
         println!("translated [{}]: '{}' to '{}' - {} tokens generated ({:.2} token/s), total {} tokens ({:.2} token/s)", count, key, result_str, outlen, time_current, total_len, time_total);
         let value = serde_json::Value::String(result_str);
         json_mut.insert(key.to_owned(), value);
+        if count % 20 == 19 {
+            println!("mcmonkey's Translate-Tool saving intermediate result...");
+            let json = serde_json::Value::Object(json_mut.clone());
+            let mut json = serde_json::to_string_pretty(&json)?;
+            json.push_str("\n");
+            std::fs::write(&args.out_json, json)?;
+        }
     }
     println!("Translated a total of {} entries out of {} available (skipping {}) after {:.2} seconds", count, json.len(), json.len() - count, start.elapsed().as_secs_f64());
     println!("mcmonkey's Translate-Tool saving result...");
