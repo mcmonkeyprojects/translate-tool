@@ -6,13 +6,14 @@ Built using https://github.com/huggingface/candle and by default uses this model
 
 ## Usage
 
-First compile:
+Install rust: https://www.rust-lang.org/tools/install
+
+Compile:
 ```sh
 cargo build --release
 ```
 
-Then run:
-
+Run:
 ```sh
 ./target/release/translate-tool.exe --in-json "data/test-in.json" --out-json "data/test-out.json" --language de
 ```
