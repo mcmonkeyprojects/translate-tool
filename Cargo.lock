@@ -111,17 +111,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9d297deb1925b89f2ccc13d7635fa0714f12c87adce1c75356b39ca9b7178567"
 
 [[package]]
-name = "bindgen_cuda"
-version = "0.1.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b58b8c5f0502d6b70e957f2562b65cef7b2056996b27da47e43242d46251a9d1"
-dependencies = [
- "glob",
- "num_cpus",
- "rayon",
-]
-
-[[package]]
 name = "bitflags"
 version = "1.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -180,8 +169,6 @@ version = "0.3.3"
 source = "git+https://github.com/huggingface/candle.git#e6d86b081980196745e5f0b0eda8ce5334c0ff67"
 dependencies = [
  "byteorder",
- "candle-kernels",
- "cudarc",
  "gemm",
  "half",
  "memmap2",
@@ -194,14 +181,6 @@ dependencies = [
  "thiserror",
  "yoke",
  "zip",
-]
-
-[[package]]
-name = "candle-kernels"
-version = "0.3.3"
-source = "git+https://github.com/huggingface/candle.git#e6d86b081980196745e5f0b0eda8ce5334c0ff67"
-dependencies = [
- "bindgen_cuda",
 ]
 
 [[package]]
@@ -397,15 +376,6 @@ checksum = "1bfb12502f3fc46cca1bb51ac28df9d618d813cdc3d2f25b9fe775a34af26bb3"
 dependencies = [
  "generic-array",
  "typenum",
-]
-
-[[package]]
-name = "cudarc"
-version = "0.10.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9395df0cab995685664e79cc35ad6302bf08fb9c5d82301875a183affe1278b1"
-dependencies = [
- "half",
 ]
 
 [[package]]
@@ -804,12 +774,6 @@ dependencies = [
  "quote",
  "syn 1.0.109",
 ]
-
-[[package]]
-name = "glob"
-version = "0.3.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d2fabcfbdc87f4758337ca535fb41a6d701b65693ce38287d856d1674551ec9b"
 
 [[package]]
 name = "half"

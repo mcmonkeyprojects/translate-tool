@@ -9,8 +9,8 @@ license = "MIT"
 
 [dependencies]
 anyhow = "1.0.79"
-candle-core = { git = "https://github.com/huggingface/candle.git", version = "0.3.3", features = ["cuda"] }
-candle-transformers = { git = "https://github.com/huggingface/candle.git", version = "0.3.3", features = ["cuda"] }
+candle-core = { git = "https://github.com/huggingface/candle.git", version = "0.3.3" } #, features = ["cuda"]
+candle-transformers = { git = "https://github.com/huggingface/candle.git", version = "0.3.3" } #, features = ["cuda"]
 clap = { version = "4.4.16", features = ["derive"] }
 hf-hub = "0.3.2"
 intel-mkl-src = "0.8.1"
