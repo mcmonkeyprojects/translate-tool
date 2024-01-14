@@ -9,23 +9,28 @@ Built using https://github.com/huggingface/candle and by default uses this model
 - Install rust: https://www.rust-lang.org/tools/install
     - Expect silly rust errors that you have to google (eg requiring Visual Studio on Windows for some reason)
 
-Compile:
+#### Compile:
 ```sh
 cargo build --release
 ```
 
-Run:
+#### Run:
 ```sh
 ./target/release/translate-tool.exe --in-json "data/test-in.json" --out-json "data/test-out.json" --language de
 ```
+
+Language should be a standard language code - if in doubt, see list at https://arxiv.org/pdf/2309.04662.pdf Appendix A.1
 
 Tack `--verbose` onto the end to get some live debug output as it goes.
 
 Use `--model-id jbochi/madlad400-3b-mt` if you're impatient and want a smaller model.
 
-On an Intel i7-12700KF, 7b-mt-bt runs at around 2.5 token/s, 3b-mt runs at around 5 token/s.
+Speed comparison:
+| CPU | 7B-MT-BT | 3B-MT |
+| --- | -------- | ----- |
+| i7-12700KF | 2.5 tok/s | 5 tok/s |
 
-Example input JSON file:
+#### Example input JSON file:
 ```json
 {
     "keys": {
@@ -35,9 +40,11 @@ Example input JSON file:
 }
 ```
 
+#### Explanation
+
 This will translate keys and store the result in the value, skipping any keys that already have a value.
 
-Language should be a standard language code - if in doubt, see list at https://arxiv.org/pdf/2309.04662.pdf Appendix A.1
+First run will automatically download the model, subsequent runs will load from HF cache (in user dir -> `.cache/huggingface/hub`)
 
 Note that this runs entirely on CPU, because the Transformers GPU version needs too much VRAM to work and GGUF doesn't want to work on GPU within candle I guess? "Oh but why not use regular GGML to run it then" because GGML doesn't support T5??? Idk why candle supports GGML-formatted T5 but GGML itself doesn't. AI tech is a mess. If you're reading this after year 2024 when this was made there's hopefully less dumb ways to do what is currently cutting edge AI stuff.
 
