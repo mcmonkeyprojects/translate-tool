@@ -1,0 +1,19 @@
+[package]
+name = "translate-tool"
+version = "0.1.0"
+edition = "2021"
+readme = "https://github.com/mcmonkeyprojects/translate-tool/blob/master/README.md"
+license = "MIT"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+anyhow = "1.0.79"
+candle-core = { git = "https://github.com/huggingface/candle.git", version = "0.3.3", features = ["cuda"] }
+candle-transformers = { git = "https://github.com/huggingface/candle.git", version = "0.3.3", features = ["cuda"] }
+clap = { version = "4.4.16", features = ["derive"] }
+hf-hub = "0.3.2"
+intel-mkl-src = "0.8.1"
+serde = "1.0.195"
+serde_json = "1.0.111"
+tokenizers = { version = "0.15.0", features = ["onig"] }
