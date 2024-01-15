@@ -318,7 +318,7 @@ fn main() -> Result<()> {
     let start = std::time::Instant::now();
     let mut count: usize = 0;
     let mut json_mut = json.clone().to_owned();
-    let mut json_key_list = json.keys().map(|x| x.to_owned()).collect::<Vec<String>>();
+    let mut json_key_list = json.get("keys").ok_or(E::msg("Add-JSON file must have a 'keys' field"))?.as_object().ok_or(E::msg("JSON file 'keys' field must be an object"))?.keys().map(|x| x.to_owned()).collect::<Vec<String>>();
     if !args.add_json.is_empty() {
         let add_json = std::fs::read_to_string(&args.add_json)?;
         let add_json: serde_json::Value = serde_json::from_str(&add_json)?;
