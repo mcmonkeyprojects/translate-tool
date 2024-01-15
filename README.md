@@ -31,11 +31,11 @@ Add `--add-json "data/other-file.json"` to also append new keys in a secondary k
 
 Add `--max-tokens 60` to set the split length. This depends on when/how the model breaks down. Set it *BELOW* seq len.
 
-Speed comparison:
+Speed comparison (extremely variable with prompt):
 | CPU | 7B-MT-BT | 3B-MT |
 | --- | -------- | ----- |
-| Intel i7-12700KF (12 p-core) | 4.5 tok/s | 10.8 tok/s |
-| AMD Ryzen 5 3600 (6 core) | 1.5 tok/s | 3.6 tok/s |
+| Intel i7-12700KF (12 p-core) | 7 tok/s | 15 tok/s |
+| AMD Ryzen 5 3600 (6 core) | 4 tok/s | 8 tok/s |
 
 #### Example input JSON file:
 ```json
