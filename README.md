@@ -25,6 +25,8 @@ Tack `--verbose` onto the end to get some live debug output as it goes.
 
 Use `--model-id jbochi/madlad400-3b-mt` if you're impatient and want a smaller model.
 
+Add `--max-ratio 10` to automatically stop the model if its output is 10x longer than input (defaults to 5). This usually indicates an AI breakdown.
+
 Speed comparison:
 | CPU | 7B-MT-BT | 3B-MT |
 | --- | -------- | ----- |

@@ -25,21 +25,25 @@ enum Which {
 #[derive(Parser, Debug, Clone)]
 #[command(author, version, about, long_about = None)]
 struct Args {
-    // optional verbose debug log
+    /// optional verbose debug log
     #[arg(long, default_value = "false")]
     verbose: bool,
 
-    // JSON source file
+    /// JSON source file
     #[arg(long)]
     in_json: String,
 
-    // JSON result file
+    /// JSON result file
     #[arg(long)]
     out_json: String,
 
     // Language code eg 'en', 'de', etc.
     #[arg(long)]
     language: String,
+    
+    /// The relative ratio of output vs input after which the model is presumed to have broken.
+    #[arg(long, default_value_t = 5.0)]
+    max_ratio: f32,
 
     // All args below are from HF example, (with some added defaults and docs).
 
@@ -47,18 +51,18 @@ struct Args {
     #[arg(long, default_value = "jbochi/madlad400-7b-mt-bt")]
     model_id: String,
 
-    // HF example didn't document this but I think it's the branch
+    /// HF example didn't document this but I think it's the branch
     #[arg(long, default_value = "main")]
     revision: String,
 
     #[arg(long, default_value = "model-q4k.gguf")]
     weight_file: Option<String>,
 
-    // HF didn't document this either but it lets you switch to a different config if the repo is missing one
+    /// HF didn't document this either but it lets you switch to a different config if the repo is missing one
     #[arg(long)]
     config_file: Option<String>,
 
-    // Enable/disable decoding.
+    /// Enable/disable decoding.
     #[arg(long, default_value = "false")]
     disable_cache: bool,
 
@@ -169,6 +173,9 @@ fn translate(args: Args, builder: &T5ModelBuilder, model: &mut T5ForConditionalG
         let mut total_len: usize = 0;
         for part in parts {
             let (part_result, part_len) = translate(args.clone(), builder, model, tokenizer, logits_processor, &part, language_token)?;
+            if part_len == 0 {
+                return Ok((part_result, 0));
+            }
             total_len += part_len;
             if !result_str.is_empty() {
                 result_str.push_str(combine);
@@ -268,14 +275,15 @@ fn translate(args: Args, builder: &T5ModelBuilder, model: &mut T5ForConditionalG
             }
             std::io::stdout().flush()?;
             final_result_str.push_str(&text);
+            if (final_result_str.len() as f32) / (prompt.len() as f32) > args.max_ratio {
+                println!("WARNING: Result is {} chars long, but input was {} chars long - probably translation failure -- {prompt}, {final_result_str}", final_result_str.len(), prompt.len());
+                return Ok(("".to_owned(), 0));
+            }
         }
     }
     final_result_str = final_result_str.trim().to_owned();
     let dt = start.elapsed();
     verbose(&args, &format!("\n{} tokens generated ({:.2} token/s)\n", output_token_ids.len(), output_token_ids.len() as f64 / dt.as_secs_f64()));
-    if final_result_str.len() > prompt.len() * 10 {
-        println!("WARNING: Result is {} chars long, but input was {} chars long - probably translation failure -- {prompt}, {final_result_str}", final_result_str.len(), prompt.len());
-    }
     Ok((final_result_str, output_token_ids.len()))
 }
 
