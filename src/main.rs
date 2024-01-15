@@ -177,6 +177,9 @@ fn sane_split(prompt: &str, split: &str, min: usize, max: usize) -> Vec<String> 
 fn translate(args: Args, builder: &T5ModelBuilder, model: &mut T5ForConditionalGeneration, tokenizer: &TokenizerImpl<ModelWrapper, NormalizerWrapper, PreTokenizerWrapper, PostProcessorWrapper, DecoderWrapper>, logits_processor: &mut LogitsProcessor, in_prompt: &str, language_token: &Vec<u32>) -> Result<(String, usize)> {
     let prompt = in_prompt.trim();
     verbose(&args, format!("mcmonkey's Translate-Tool received input '{}', tokenizing...", prompt).as_str());
+    if prompt.len() == 0 {
+        return Ok((" ".to_owned(), 1));
+    }
     let tokens = tokenizer.encode(prompt, true).map_err(E::msg)?.get_ids().to_vec();
 
     // Autosplitter to accomodate the 128 token limit.
@@ -198,19 +201,15 @@ fn translate(args: Args, builder: &T5ModelBuilder, model: &mut T5ForConditionalG
         Ok((result_str, total_len))
     };
     // Tries newlines, then sentence boundaries, then word boundaries, then gives up and uses raw token chunking.
-    if tokens.len() > args.max_tokens {
-        let chunks = sane_split(prompt, "\n", 0, 40);
-        if chunks.len() > 1 {
-            verbose(&args, format!("Prompt length is {}, splitting to {} chunks based on new line", tokens.len(), chunks.len()).as_str());
-            return subtranslate_chunk(chunks, "\n");
-        }
+    let nl_chunks = sane_split(prompt, "\n", 0, 40);
+    if nl_chunks.len() > 1 {
+        verbose(&args, format!("Prompt length is {}, splitting to {} chunks based on new line", tokens.len(), nl_chunks.len()).as_str());
+        return subtranslate_chunk(nl_chunks, "\n");
     }
-    if tokens.len() > args.max_tokens {
-        let chunks = sane_split(prompt, ". ", 0, 40);
-        if chunks.len() > 1 {
-            verbose(&args, format!("Prompt length is {}, splitting to {} chunks based on sentence boundaries", tokens.len(), chunks.len()).as_str());
-            return subtranslate_chunk(chunks, ". ");
-        }
+    let sent_chunks = sane_split(prompt, ". ", 0, 40);
+    if sent_chunks.len() > 1 {
+        verbose(&args, format!("Prompt length is {}, splitting to {} chunks based on sentence boundaries", tokens.len(), sent_chunks.len()).as_str());
+        return subtranslate_chunk(sent_chunks, ". ");
     }
     if tokens.len() > args.max_tokens {
         let chunks = sane_split(prompt, ",", 10, 40);
