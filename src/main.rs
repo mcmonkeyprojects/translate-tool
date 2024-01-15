@@ -44,6 +44,10 @@ struct Args {
     /// The relative ratio of output vs input after which the model is presumed to have broken.
     #[arg(long, default_value_t = 5.0)]
     max_ratio: f32,
+    
+    /// Seed value.
+    #[arg(long, default_value_t = 1)]
+    seed: u64,
 
     // All args below are from HF example, (with some added defaults and docs).
 
@@ -293,7 +297,7 @@ fn main() -> Result<()> {
     let (builder, mut tokenizer) = T5ModelBuilder::load(&args)?;
     let tokenizer = tokenizer.with_padding(None).with_truncation(None).map_err(E::msg)?;
     let temperature = if args.temperature <= 0. { None } else { Some(args.temperature) };
-    let mut logits_processor = LogitsProcessor::new(299792458, temperature, args.top_p); // wtf is this handwritten static seed? (straight from HF example)
+    let mut logits_processor = LogitsProcessor::new(args.seed, temperature, args.top_p);
     let language_token = tokenizer.encode(format!("<2{}>", args.language).as_str(), false).map_err(E::msg)?.get_ids().to_vec();
     println!("mcmonkey's Translate-Tool loading model...");
     let mut model = builder.build_model()?;
