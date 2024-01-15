@@ -27,6 +27,8 @@ Use `--model-id jbochi/madlad400-3b-mt` if you're impatient and want a smaller m
 
 Add `--max-ratio 10` to automatically stop the model if its output is 10x longer than input (defaults to 5). This usually indicates an AI breakdown.
 
+Add `--add-json "data/other-file.json"` to also append new keys in a secondary key file.
+
 Speed comparison:
 | CPU | 7B-MT-BT | 3B-MT |
 | --- | -------- | ----- |

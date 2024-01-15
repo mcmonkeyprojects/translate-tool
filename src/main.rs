@@ -33,6 +33,10 @@ struct Args {
     #[arg(long)]
     in_json: String,
 
+    /// JSON secondary source file
+    #[arg(long, default_value = "")]
+    add_json: String,
+
     /// JSON result file
     #[arg(long)]
     out_json: String,
@@ -312,10 +316,25 @@ fn main() -> Result<()> {
     let start = std::time::Instant::now();
     let mut count: usize = 0;
     let mut json_mut = json.clone();
-    for (key, value) in json {
+    let mut json_keys = json.keys().map(|x| x.to_owned()).collect::<Vec<String>>();
+    if !args.add_json.is_empty() {
+        let add_json = std::fs::read_to_string(&args.add_json)?;
+        let add_json: serde_json::Value = serde_json::from_str(&add_json)?;
+        let add_json = add_json.as_object().ok_or(E::msg("Add-JSON file must be an object"))?;
+        let add_json = add_json.get("keys").ok_or(E::msg("Add-JSON file must have a 'keys' field"))?;
+        let add_json = add_json.as_object().ok_or(E::msg("Add-JSON file 'keys' field must be an object"))?;
+        let add_json_keys = add_json.keys().map(|x| x.to_owned()).collect::<Vec<String>>();
+        for key in add_json_keys {
+            if !json_keys.contains(&key) {
+                json_keys.push(key);
+            }
+        }
+    }
+    for key in json_keys {
         let before_time = start.elapsed().as_secs_f64();
         let key = key.as_str();
-        let value = value.as_str().ok_or(E::msg("JSON file 'keys' field must be an object of strings"))?;
+        // value or default ""
+        let value = json.get(key).map_or("", |x| x.as_str().unwrap_or(""));
         if !value.is_empty() {
             continue;
         }
