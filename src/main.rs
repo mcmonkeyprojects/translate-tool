@@ -53,6 +53,10 @@ struct Args {
     #[arg(long, default_value_t = 1)]
     seed: u64,
 
+    /// The maximum number of tokens in input before splitting.
+    #[arg(long, default_value_t = 60)]
+    max_tokens: usize,
+
     // All args below are from HF example, (with some added defaults and docs).
 
     /// The model repository to use on the HuggingFace hub.
@@ -194,39 +198,39 @@ fn translate(args: Args, builder: &T5ModelBuilder, model: &mut T5ForConditionalG
         Ok((result_str, total_len))
     };
     // Tries newlines, then sentence boundaries, then word boundaries, then gives up and uses raw token chunking.
-    if tokens.len() > 80 {
-        let chunks = sane_split(prompt, "\n", 0, 60);
+    if tokens.len() > args.max_tokens {
+        let chunks = sane_split(prompt, "\n", 0, 40);
         if chunks.len() > 1 {
             verbose(&args, format!("Prompt length is {}, splitting to {} chunks based on new line", tokens.len(), chunks.len()).as_str());
             return subtranslate_chunk(chunks, "\n");
         }
     }
-    if tokens.len() > 80 {
-        let chunks = sane_split(prompt, ". ", 0, 60);
+    if tokens.len() > args.max_tokens {
+        let chunks = sane_split(prompt, ". ", 0, 40);
         if chunks.len() > 1 {
             verbose(&args, format!("Prompt length is {}, splitting to {} chunks based on sentence boundaries", tokens.len(), chunks.len()).as_str());
             return subtranslate_chunk(chunks, ". ");
         }
     }
-    if tokens.len() > 80 {
-        let chunks = sane_split(prompt, ",", 30, 60);
+    if tokens.len() > args.max_tokens {
+        let chunks = sane_split(prompt, ",", 10, 40);
         if chunks.len() > 1 {
             verbose(&args, format!("Prompt length is {}, splitting to {} chunks based on commas", tokens.len(), chunks.len()).as_str());
             return subtranslate_chunk(chunks, ",");
         }
     }
-    if tokens.len() > 80 {
-        let chunks = sane_split(prompt, " ", 30, 60);
+    if tokens.len() > args.max_tokens {
+        let chunks = sane_split(prompt, " ", 10, 40);
         if chunks.len() > 1 {
             verbose(&args, format!("Prompt length is {}, splitting to {} chunks based on spaces", tokens.len(), chunks.len()).as_str());
             return subtranslate_chunk(chunks, " ");
         }
     }
-    if tokens.len() > 80 {
+    if tokens.len() > args.max_tokens {
         let mut result = "".to_owned();
         let mut total_len: usize = 0;
-        verbose(&args, format!("Prompt length is {}, splitting to chunks around raw token split 50 (THIS IS BAD, WILL MISTRANSLATE NEAR BOUNDARY)", tokens.len()).as_str());
-        for chunk in tokens.chunks(50) {
+        verbose(&args, format!("Prompt length is {}, splitting to chunks around raw token split {} (THIS IS BAD, WILL MISTRANSLATE NEAR BOUNDARY)", tokens.len(), args.max_tokens).as_str());
+        for chunk in tokens.chunks(args.max_tokens) {
             let chunk = chunk.to_vec();
             let prompt = tokenizer.decode(chunk.as_slice(), false).map_err(E::msg)?;
             let (chunk_result, chunk_len) = translate(args.clone(), builder, model, tokenizer, logits_processor, &prompt, language_token)?;

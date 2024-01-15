@@ -29,6 +29,8 @@ Add `--max-ratio 10` to automatically stop the model if its output is 10x longer
 
 Add `--add-json "data/other-file.json"` to also append new keys in a secondary key file.
 
+Add `--max-tokens 60` to set the split length. This depends on when/how the model breaks down. Set it *BELOW* seq len.
+
 Speed comparison:
 | CPU | 7B-MT-BT | 3B-MT |
 | --- | -------- | ----- |
