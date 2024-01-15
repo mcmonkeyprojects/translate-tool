@@ -313,14 +313,12 @@ fn main() -> Result<()> {
     let json = std::fs::read_to_string(&args.in_json)?;
     let json: serde_json::Value = serde_json::from_str(&json)?;
     let json = json.as_object().ok_or(E::msg("JSON file must be an object"))?;
-    let json = json.get("keys").ok_or(E::msg("JSON file must have a 'keys' field"))?;
-    let json = json.as_object().ok_or(E::msg("JSON file 'keys' field must be an object"))?;
     println!("mcmonkey's Translate-Tool translating...");
     let mut total_len: usize = 0;
     let start = std::time::Instant::now();
     let mut count: usize = 0;
-    let mut json_mut = json.clone();
-    let mut json_keys = json.keys().map(|x| x.to_owned()).collect::<Vec<String>>();
+    let mut json_mut = json.clone().to_owned();
+    let mut json_key_list = json.keys().map(|x| x.to_owned()).collect::<Vec<String>>();
     if !args.add_json.is_empty() {
         let add_json = std::fs::read_to_string(&args.add_json)?;
         let add_json: serde_json::Value = serde_json::from_str(&add_json)?;
@@ -329,15 +327,14 @@ fn main() -> Result<()> {
         let add_json = add_json.as_object().ok_or(E::msg("Add-JSON file 'keys' field must be an object"))?;
         let add_json_keys = add_json.keys().map(|x| x.to_owned()).collect::<Vec<String>>();
         for key in add_json_keys {
-            if !json_keys.contains(&key) {
-                json_keys.push(key);
+            if !json_key_list.contains(&key) {
+                json_key_list.push(key);
             }
         }
     }
-    for key in json_keys {
+    for key in json_key_list {
         let before_time = start.elapsed().as_secs_f64();
         let key = key.as_str();
-        // value or default ""
         let value = json.get(key).map_or("", |x| x.as_str().unwrap_or(""));
         if !value.is_empty() {
             continue;
@@ -350,7 +347,7 @@ fn main() -> Result<()> {
         count += 1;
         println!("translated [{}]: '{}' to '{}' - {} tokens generated ({:.2} token/s), total {} tokens ({:.2} token/s)", count, key, result_str, outlen, time_current, total_len, time_total);
         let value = serde_json::Value::String(result_str);
-        json_mut.insert(key.to_owned(), value);
+        json_mut.get_mut("keys").ok_or(E::msg("Add-JSON file must have a 'keys' field"))?.as_object_mut().ok_or(E::msg("JSON file 'keys' field must be an object"))?.insert(key.to_owned(), value);
         if count % 20 == 19 {
             println!("mcmonkey's Translate-Tool saving intermediate result...");
             let json = serde_json::Value::Object(json_mut.clone());
