@@ -179,39 +179,39 @@ fn translate(args: Args, builder: &T5ModelBuilder, model: &mut T5ForConditionalG
         Ok((result_str, total_len))
     };
     // Tries newlines, then sentence boundaries, then word boundaries, then gives up and uses raw token chunking.
-    if tokens.len() > 100 {
-        let chunks = sane_split(prompt, "\n", 20, 80);
+    if tokens.len() > 80 {
+        let chunks = sane_split(prompt, "\n", 0, 60);
         if chunks.len() > 1 {
             verbose(&args, format!("Prompt length is {}, splitting to {} chunks based on new line", tokens.len(), chunks.len()).as_str());
             return subtranslate_chunk(chunks, "\n");
         }
     }
-    if tokens.len() > 100 {
-        let chunks = sane_split(prompt, ". ", 20, 80);
+    if tokens.len() > 80 {
+        let chunks = sane_split(prompt, ". ", 0, 60);
         if chunks.len() > 1 {
             verbose(&args, format!("Prompt length is {}, splitting to {} chunks based on sentence boundaries", tokens.len(), chunks.len()).as_str());
             return subtranslate_chunk(chunks, ". ");
         }
     }
-    if tokens.len() > 100 {
-        let chunks = sane_split(prompt, ",", 30, 80);
+    if tokens.len() > 80 {
+        let chunks = sane_split(prompt, ",", 30, 60);
         if chunks.len() > 1 {
             verbose(&args, format!("Prompt length is {}, splitting to {} chunks based on commas", tokens.len(), chunks.len()).as_str());
             return subtranslate_chunk(chunks, ",");
         }
     }
-    if tokens.len() > 100 {
-        let chunks = sane_split(prompt, " ", 30, 80);
+    if tokens.len() > 80 {
+        let chunks = sane_split(prompt, " ", 30, 60);
         if chunks.len() > 1 {
             verbose(&args, format!("Prompt length is {}, splitting to {} chunks based on spaces", tokens.len(), chunks.len()).as_str());
             return subtranslate_chunk(chunks, " ");
         }
     }
-    if tokens.len() > 100 {
+    if tokens.len() > 80 {
         let mut result = "".to_owned();
         let mut total_len: usize = 0;
-        verbose(&args, format!("Prompt length is {}, splitting to chunks around raw token split 100 (THIS IS BAD, WILL MISTRANSLATE NEAR BOUNDARY)", tokens.len()).as_str());
-        for chunk in tokens.chunks(80) {
+        verbose(&args, format!("Prompt length is {}, splitting to chunks around raw token split 50 (THIS IS BAD, WILL MISTRANSLATE NEAR BOUNDARY)", tokens.len()).as_str());
+        for chunk in tokens.chunks(50) {
             let chunk = chunk.to_vec();
             let prompt = tokenizer.decode(chunk.as_slice(), false).map_err(E::msg)?;
             let (chunk_result, chunk_len) = translate(args.clone(), builder, model, tokenizer, logits_processor, &prompt, language_token)?;
