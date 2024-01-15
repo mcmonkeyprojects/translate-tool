@@ -34,7 +34,7 @@ Add `--max-tokens 60` to set the split length. This depends on when/how the mode
 Speed comparison:
 | CPU | 7B-MT-BT | 3B-MT |
 | --- | -------- | ----- |
-| Intel i7-12700KF (12 p-core) | 2.5 tok/s | 5 tok/s |
+| Intel i7-12700KF (12 p-core) | 4.5 tok/s | 10.8 tok/s |
 | AMD Ryzen 5 3600 (6 core) | 1.5 tok/s | 3.6 tok/s |
 
 #### Example input JSON file:
