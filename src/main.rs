@@ -334,7 +334,7 @@ fn main() -> Result<()> {
     for key in json_key_list {
         let before_time = start.elapsed().as_secs_f64();
         let key = key.as_str();
-        let value = json.get(key).map_or("", |x| x.as_str().unwrap_or(""));
+        let value = json.get("keys").ok_or(E::msg("wtf"))?.get(key).map_or("", |x| x.as_str().unwrap_or(""));
         if !value.is_empty() {
             continue;
         }
